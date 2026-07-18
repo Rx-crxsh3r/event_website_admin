@@ -28,10 +28,22 @@ export function StepFeatureFlags() {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-slate-500">
-        These take effect immediately on the mobile app (after its next
-        Remote Config fetch) - not just at launch.
-      </p>
+      <div className="text-sm text-slate-500 rounded border border-slate-200 bg-slate-50 p-3 space-y-1">
+        <p>
+          Published immediately here, but the mobile app only checks for
+          new values once per cold start (fully closed and reopened,
+          not just backgrounded) and won't check again until{' '}
+          <strong>12 hours</strong> have passed since its last check - so
+          most users won't see a change until both of those line up.
+        </p>
+        <p>
+          Exception: whether points get <em>awarded</em> for leaderboard
+          actions is decided server-side and reacts within ~5 minutes.
+          That's just the awarding logic, though - the Leaderboard tab
+          itself still follows the same 12-hour/cold-start rule as every
+          other flag above.
+        </p>
+      </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
       {REMOTE_CONFIG_FLAGS.map((flag) => (
         <label
