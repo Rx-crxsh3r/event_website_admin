@@ -4,6 +4,7 @@ import { collection, onSnapshot, query, where, limit } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { EventWizardPage } from './wizard/EventWizardPage'
 import { LiveEventPage } from './live/LiveEventPage'
+import logo from '../assets/logo.png'
 
 interface Props {
   user: User
@@ -36,7 +37,10 @@ export function DashboardPage({ user, onSignOut }: Props) {
     <div className="min-h-screen bg-slate-100">
       <header className="bg-white border-b border-slate-200">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="text-lg font-semibold text-slate-900">Super Admin</h1>
+          <div className="flex items-center gap-2">
+            <img src={logo} alt="" className="h-8 w-8" />
+            <h1 className="text-lg font-semibold text-slate-900">Super Admin</h1>
+          </div>
           <div className="flex items-center gap-3">
             <span className="text-sm text-slate-500">{user.email}</span>
             <button

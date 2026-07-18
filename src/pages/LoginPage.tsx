@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import logo from '../assets/logo.png'
 
 interface Props {
   onSignIn: (email: string, password: string) => Promise<void>
@@ -21,6 +22,7 @@ export function LoginPage({ onSignIn, error, unauthorized }: Props) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100">
       <div className="w-full max-w-sm bg-white rounded-lg shadow p-8">
+        <img src={logo} alt="" className="h-14 w-14 mb-4" />
         <h1 className="text-xl font-semibold text-slate-900 mb-1">
           Super Admin
         </h1>
