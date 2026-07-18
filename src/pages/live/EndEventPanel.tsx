@@ -9,6 +9,7 @@ const wipeEvent = httpsCallable(functions, 'superAdminWipeEvent')
 interface ExportResult {
   jsonPath: string
   csvPath: string
+  reportPath: string
   summary: Record<string, unknown>
 }
 
@@ -19,7 +20,7 @@ interface Props {
 export function EndEventPanel({ eventId }: Props) {
   const [generating, setGenerating] = useState(false)
   const [exportResult, setExportResult] = useState<ExportResult | null>(null)
-  const [downloadUrls, setDownloadUrls] = useState<{ json: string; csv: string } | null>(null)
+  const [downloadUrls, setDownloadUrls] = useState<{ json: string; csv: string; report: string } | null>(null)
   const [downloaded, setDownloaded] = useState(false)
   const [wiping, setWiping] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -31,11 +32,12 @@ export function EndEventPanel({ eventId }: Props) {
       const result = await generateExport({ eventId })
       const data = result.data as ExportResult
       setExportResult(data)
-      const [json, csv] = await Promise.all([
+      const [json, csv, report] = await Promise.all([
         getDownloadURL(ref(storage, data.jsonPath)),
         getDownloadURL(ref(storage, data.csvPath)),
+        getDownloadURL(ref(storage, data.reportPath)),
       ])
-      setDownloadUrls({ json, csv })
+      setDownloadUrls({ json, csv, report })
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to generate export.')
     } finally {
@@ -84,7 +86,15 @@ export function EndEventPanel({ eventId }: Props) {
               {JSON.stringify(exportResult.summary, null, 2)}
             </pre>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
+            <a
+              href={downloadUrls.report}
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm text-blue-700 underline font-medium"
+            >
+              View report (charts + summary)
+            </a>
             <a
               href={downloadUrls.json}
               target="_blank"
