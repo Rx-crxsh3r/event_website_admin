@@ -79,6 +79,25 @@ export function StepSessions({ draftId }: Props) {
       speakerIds: selectedSpeakers,
       liveStreamUrl: '',
       capacity,
+      // Written explicitly (matching Session's Dart-side defaults) so
+      // the session doc always has these fields from creation, rather
+      // than relying on every Firestore rule that reads them to also
+      // handle "field genuinely absent" as a special case.
+      priority: 3,
+      partnerId: '',
+      isChatEnabled: true,
+      closedBy: '',
+      checkedInAttendees: [],
+      totalMessages: 0,
+      uniqueParticipants: [],
+      mutedUsers: [],
+      deletedMessagesCount: 0,
+      messagesByRole: {},
+      muteHistory: [],
+      totalMuteActions: 0,
+      totalFeedbacks: 0,
+      totalRating: 0,
+      averageRating: 0,
     })
     setTitle('')
     setLocation('')
