@@ -10,20 +10,33 @@ import {
   Timestamp,
 } from 'firebase/firestore'
 import { db } from '../../lib/firebase'
-import type { SessionEntry, SpeakerEntry } from '../../lib/types'
+import type { SessionEntry, SpeakerEntry, SponsorEntry } from '../../lib/types'
 
 interface Props {
   draftId: string
 }
 
+// Mirrors the 1-5 scale documented on Session.priority in
+// lib/core/models/session_model.dart - keep these two in sync.
+const PRIORITY_LEVELS = [
+  { value: 1, label: '1 - Low', hint: 'Optional breakout sessions' },
+  { value: 2, label: '2 - Below normal', hint: 'Specialized workshops' },
+  { value: 3, label: '3 - Normal', hint: 'Regular talks' },
+  { value: 4, label: '4 - High', hint: 'Featured speakers, important announcements' },
+  { value: 5, label: '5 - Maximum', hint: 'Keynotes, urgent updates, main event streams' },
+] as const
+
 export function StepSessions({ draftId }: Props) {
   const [sessions, setSessions] = useState<SessionEntry[]>([])
   const [speakers, setSpeakers] = useState<SpeakerEntry[]>([])
+  const [sponsors, setSponsors] = useState<SponsorEntry[]>([])
   const [title, setTitle] = useState('')
   const [location, setLocation] = useState('')
   const [startTime, setStartTime] = useState('')
   const [endTime, setEndTime] = useState('')
   const [capacity, setCapacity] = useState(0)
+  const [priority, setPriority] = useState(3)
+  const [partnerId, setPartnerId] = useState('')
   const [selectedSpeakers, setSelectedSpeakers] = useState<string[]>([])
 
   useEffect(() => {
@@ -43,6 +56,8 @@ export function StepSessions({ draftId }: Props) {
             speakerIds: data.speakerIds ?? [],
             liveStreamUrl: data.liveStreamUrl ?? '',
             capacity: data.capacity ?? 0,
+            priority: data.priority ?? 3,
+            partnerId: data.partnerId ?? '',
           }
         })
       )
@@ -61,9 +76,16 @@ export function StepSessions({ draftId }: Props) {
         }))
       )
     })
+    const sponsorsQuery = query(collection(db, 'sponsors'), where('eventId', '==', draftId))
+    const unsubSponsors = onSnapshot(sponsorsQuery, (snap) => {
+      setSponsors(
+        snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<SponsorEntry, 'id'>) }))
+      )
+    })
     return () => {
       unsubSessions()
       unsubSpeakers()
+      unsubSponsors()
     }
   }, [draftId])
 
@@ -83,8 +105,8 @@ export function StepSessions({ draftId }: Props) {
       // the session doc always has these fields from creation, rather
       // than relying on every Firestore rule that reads them to also
       // handle "field genuinely absent" as a special case.
-      priority: 3,
-      partnerId: '',
+      priority,
+      partnerId,
       isChatEnabled: true,
       closedBy: '',
       checkedInAttendees: [],
@@ -104,6 +126,8 @@ export function StepSessions({ draftId }: Props) {
     setStartTime('')
     setEndTime('')
     setCapacity(0)
+    setPriority(3)
+    setPartnerId('')
     setSelectedSpeakers([])
   }
 
@@ -134,27 +158,67 @@ export function StepSessions({ draftId }: Props) {
             className="rounded border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
-        <div className="grid grid-cols-3 gap-3">
-          <input
-            type="datetime-local"
-            value={startTime}
-            onChange={(e) => setStartTime(e.target.value)}
-            className="rounded border border-slate-300 px-3 py-2 text-sm"
-          />
-          <input
-            type="datetime-local"
-            value={endTime}
-            onChange={(e) => setEndTime(e.target.value)}
-            className="rounded border border-slate-300 px-3 py-2 text-sm"
-          />
-          <input
-            type="number"
-            min={0}
-            placeholder="Capacity (0 = unlimited)"
-            value={capacity}
-            onChange={(e) => setCapacity(Number(e.target.value))}
-            className="rounded border border-slate-300 px-3 py-2 text-sm"
-          />
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-medium text-slate-700 mb-1">
+              Start time
+            </label>
+            <input
+              type="datetime-local"
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
+              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-700 mb-1">
+              End time
+            </label>
+            <input
+              type="datetime-local"
+              value={endTime}
+              onChange={(e) => setEndTime(e.target.value)}
+              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-medium text-slate-700 mb-1">
+              Capacity
+            </label>
+            <input
+              type="number"
+              min={0}
+              placeholder="0 = unlimited"
+              value={capacity}
+              onChange={(e) => setCapacity(Number(e.target.value))}
+              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            />
+            <p className="text-xs text-slate-400 mt-1">
+              Max attendees who can check in. 0 means no limit.
+            </p>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-700 mb-1">
+              Priority
+            </label>
+            <select
+              value={priority}
+              onChange={(e) => setPriority(Number(e.target.value))}
+              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            >
+              {PRIORITY_LEVELS.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-slate-400 mt-1">
+              {PRIORITY_LEVELS.find((p) => p.value === priority)?.hint} - controls
+              sorting and highlighting in the app's agenda, not check-in capacity.
+            </p>
+          </div>
         </div>
         <div>
           <p className="text-sm font-medium text-slate-700 mb-1">Speakers</p>
@@ -179,6 +243,28 @@ export function StepSessions({ draftId }: Props) {
             )}
           </div>
         </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            Sponsor (optional)
+          </label>
+          <select
+            value={partnerId}
+            onChange={(e) => setPartnerId(e.target.value)}
+            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+          >
+            <option value="">No sponsor</option>
+            {sponsors.map((sp) => (
+              <option key={sp.id} value={sp.id}>
+                {sp.name}
+              </option>
+            ))}
+          </select>
+          {sponsors.length === 0 && (
+            <p className="text-xs text-slate-400 mt-1">
+              Add sponsors in the previous step to link one here.
+            </p>
+          )}
+        </div>
         <button
           onClick={addSession}
           className="rounded bg-slate-900 text-white text-sm font-medium px-4 py-2 hover:bg-slate-800"
@@ -201,6 +287,9 @@ export function StepSessions({ draftId }: Props) {
                   .map((id) => speakers.find((sp) => sp.uid === id)?.name)
                   .filter(Boolean)
                   .join(', ') || 'No speakers'}
+                {' · '}Priority {s.priority ?? 3}
+                {s.partnerId &&
+                  ` · Sponsored by ${sponsors.find((sp) => sp.id === s.partnerId)?.name ?? 'unknown'}`}
               </p>
             </div>
             <button

@@ -11,16 +11,33 @@ import {
 } from 'firebase/firestore'
 import { db } from '../../lib/firebase'
 import { uploadEventContentImage } from '../../lib/storage'
-import type { VenueMapEntry } from '../../lib/types'
+import type { DraftEvent, VenueMapEntry } from '../../lib/types'
 
 interface Props {
   draftId: string
+  draft: DraftEvent
+  onChange: (partial: Partial<DraftEvent>) => void
 }
 
-export function StepVenueMaps({ draftId }: Props) {
+export function StepVenueMaps({ draftId, draft, onChange }: Props) {
   const [maps, setMaps] = useState<VenueMapEntry[]>([])
   const [title, setTitle] = useState('')
   const [floor, setFloor] = useState('')
+  const [uploadingPrimary, setUploadingPrimary] = useState(false)
+
+  async function handlePrimaryMapUpload(file: File | null | undefined) {
+    if (!file) return
+    setUploadingPrimary(true)
+    try {
+      const url = await uploadEventContentImage(
+        `venue-maps/${draftId}/primary-${Date.now()}-${file.name}`,
+        file
+      )
+      onChange({ venueMapUrl: url })
+    } finally {
+      setUploadingPrimary(false)
+    }
+  }
 
   useEffect(() => {
     const q = query(
@@ -65,6 +82,33 @@ export function StepVenueMaps({ draftId }: Props) {
 
   return (
     <div className="space-y-6">
+      <div className="border-b border-slate-200 pb-6">
+        <label className="block text-sm font-medium text-slate-700 mb-1">
+          Primary venue map
+        </label>
+        <p className="text-xs text-slate-400 mb-2">
+          The single overview map shown on the event's About page - separate
+          from the detailed per-floor maps below.
+        </p>
+        {draft.venueMapUrl && (
+          <img
+            src={draft.venueMapUrl}
+            className="h-24 w-24 rounded object-cover border border-slate-200 mb-2"
+          />
+        )}
+        <input
+          type="file"
+          accept="image/*"
+          disabled={uploadingPrimary}
+          onChange={(e) => {
+            handlePrimaryMapUpload(e.target.files?.[0])
+            e.target.value = ''
+          }}
+          className="text-sm"
+        />
+        {uploadingPrimary && <p className="text-xs text-slate-500 mt-1">Uploading…</p>}
+      </div>
+
       <div className="flex gap-2 items-end border-b border-slate-200 pb-4">
         <div className="flex-1">
           <label className="block text-sm font-medium text-slate-700 mb-1">

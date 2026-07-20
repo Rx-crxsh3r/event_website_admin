@@ -88,6 +88,7 @@ function ListField({
 export function StepBasics({ draft, onChange }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
+  const [uploadingGif, setUploadingGif] = useState(false)
 
   async function handleImageUpload(files: FileList | null) {
     if (!files || files.length === 0) return
@@ -105,6 +106,20 @@ export function StepBasics({ draft, onChange }: Props) {
     } finally {
       setUploading(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  async function handleLandingGifUpload(file: File | null | undefined) {
+    if (!file) return
+    setUploadingGif(true)
+    try {
+      const url = await uploadEventContentImage(
+        `landing-gif/${Date.now()}-${file.name}`,
+        file
+      )
+      onChange({ landingGifUrl: url })
+    } finally {
+      setUploadingGif(false)
     }
   }
 
@@ -221,6 +236,33 @@ export function StepBasics({ draft, onChange }: Props) {
           value={draft.socialMedia.youtube}
           onBlurSave={(v) => onChange({ socialMedia: { ...draft.socialMedia, youtube: v } })}
         />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-slate-700 mb-1">
+          Attendee/staff home landing GIF
+        </label>
+        <p className="text-xs text-slate-400 mb-2">
+          Replaces the animated banner at the top of the attendee and staff
+          home screens. Falls back to the app's bundled default if unset.
+        </p>
+        {draft.landingGifUrl && (
+          <img
+            src={draft.landingGifUrl}
+            className="h-20 w-full max-w-xs rounded object-cover border border-slate-200 mb-2"
+          />
+        )}
+        <input
+          type="file"
+          accept="image/gif,image/*"
+          disabled={uploadingGif}
+          onChange={(e) => {
+            handleLandingGifUpload(e.target.files?.[0])
+            e.target.value = ''
+          }}
+          className="text-sm"
+        />
+        {uploadingGif && <p className="text-xs text-slate-500 mt-1">Uploading…</p>}
       </div>
 
       <div>

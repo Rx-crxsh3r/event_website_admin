@@ -9,6 +9,7 @@ export interface DraftEvent {
   location: string
   isActive: boolean
   venueMapUrl: string
+  landingGifUrl: string
   imageUrls: string[]
   venue: string
   address: string
@@ -33,6 +34,7 @@ export const emptyDraftEvent: DraftEvent = {
   location: '',
   isActive: false,
   venueMapUrl: '',
+  landingGifUrl: '',
   imageUrls: [],
   venue: '',
   address: '',
@@ -92,6 +94,8 @@ export interface SessionEntry {
   speakerIds: string[]
   liveStreamUrl: string
   capacity: number
+  priority: number // 1-5, see Session.priority in session_model.dart
+  partnerId: string // sponsor doc id, '' if none
 }
 
 export const REMOTE_CONFIG_FLAGS = [
