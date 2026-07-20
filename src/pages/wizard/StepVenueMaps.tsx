@@ -23,6 +23,7 @@ export function StepVenueMaps({ draftId, draft, onChange }: Props) {
   const [maps, setMaps] = useState<VenueMapEntry[]>([])
   const [title, setTitle] = useState('')
   const [floor, setFloor] = useState('')
+  const [description, setDescription] = useState('')
   const [uploadingPrimary, setUploadingPrimary] = useState(false)
 
   async function handlePrimaryMapUpload(file: File | null | undefined) {
@@ -56,12 +57,13 @@ export function StepVenueMaps({ draftId, draft, onChange }: Props) {
     await addDoc(collection(db, 'events', draftId, 'venueMaps'), {
       title: title.trim(),
       floor: floor.trim(),
-      description: '',
+      description: description.trim(),
       imageUrls: [],
       order: maps.length,
     })
     setTitle('')
     setFloor('')
+    setDescription('')
   }
 
   async function removeMap(id: string) {
@@ -109,7 +111,7 @@ export function StepVenueMaps({ draftId, draft, onChange }: Props) {
         {uploadingPrimary && <p className="text-xs text-slate-500 mt-1">Uploading…</p>}
       </div>
 
-      <div className="flex gap-2 items-end border-b border-slate-200 pb-4">
+      <div className="flex gap-2 items-end">
         <div className="flex-1">
           <label className="block text-sm font-medium text-slate-700 mb-1">
             Map title
@@ -127,6 +129,19 @@ export function StepVenueMaps({ draftId, draft, onChange }: Props) {
           <input
             value={floor}
             onChange={(e) => setFloor(e.target.value)}
+            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+      </div>
+      <div className="border-b border-slate-200 pb-4 space-y-3">
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            Description
+          </label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={2}
             className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
           />
         </div>

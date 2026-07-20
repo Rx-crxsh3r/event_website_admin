@@ -37,6 +37,8 @@ export function StepSessions({ draftId }: Props) {
   const [capacity, setCapacity] = useState(0)
   const [priority, setPriority] = useState(3)
   const [partnerId, setPartnerId] = useState('')
+  const [description, setDescription] = useState('')
+  const [liveStreamUrl, setLiveStreamUrl] = useState('')
   const [selectedSpeakers, setSelectedSpeakers] = useState<string[]>([])
 
   useEffect(() => {
@@ -94,12 +96,12 @@ export function StepSessions({ draftId }: Props) {
     await addDoc(collection(db, 'sessions'), {
       eventId: draftId,
       title: title.trim(),
-      description: '',
+      description: description.trim(),
       startTime: Timestamp.fromDate(new Date(startTime)),
       endTime: Timestamp.fromDate(new Date(endTime)),
       location: location.trim(),
       speakerIds: selectedSpeakers,
-      liveStreamUrl: '',
+      liveStreamUrl: liveStreamUrl.trim(),
       capacity,
       // Written explicitly (matching Session's Dart-side defaults) so
       // the session doc always has these fields from creation, rather
@@ -128,6 +130,8 @@ export function StepSessions({ draftId }: Props) {
     setCapacity(0)
     setPriority(3)
     setPartnerId('')
+    setDescription('')
+    setLiveStreamUrl('')
     setSelectedSpeakers([])
   }
 
@@ -156,6 +160,28 @@ export function StepSessions({ draftId }: Props) {
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             className="rounded border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-slate-700 mb-1">
+            Description
+          </label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={2}
+            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-slate-700 mb-1">
+            Live stream URL (optional)
+          </label>
+          <input
+            value={liveStreamUrl}
+            onChange={(e) => setLiveStreamUrl(e.target.value)}
+            placeholder="https://youtube.com/watch?v=..."
+            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
         <div className="grid grid-cols-2 gap-3">

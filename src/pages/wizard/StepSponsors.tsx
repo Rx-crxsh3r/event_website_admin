@@ -22,6 +22,11 @@ export function StepSponsors({ draftId }: Props) {
   const [sponsors, setSponsors] = useState<SponsorEntry[]>([])
   const [name, setName] = useState('')
   const [tier, setTier] = useState<(typeof TIERS)[number]>('')
+  const [website, setWebsite] = useState('')
+  const [description, setDescription] = useState('')
+  const [contactName, setContactName] = useState('')
+  const [contactEmail, setContactEmail] = useState('')
+  const [contactPhone, setContactPhone] = useState('')
   const [logoFile, setLogoFile] = useState<File | null>(null)
 
   useEffect(() => {
@@ -46,13 +51,22 @@ export function StepSponsors({ draftId }: Props) {
       eventId: draftId,
       name: name.trim(),
       logoUrl,
-      website: '',
-      description: '',
+      website: website.trim(),
+      description: description.trim(),
       tier: tier || '',
-      contact: { name: '', email: '', phone: '' },
+      contact: {
+        name: contactName.trim(),
+        email: contactEmail.trim(),
+        phone: contactPhone.trim(),
+      },
     })
     setName('')
     setTier('')
+    setWebsite('')
+    setDescription('')
+    setContactName('')
+    setContactEmail('')
+    setContactPhone('')
     setLogoFile(null)
   }
 
@@ -62,35 +76,96 @@ export function StepSponsors({ draftId }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-2 items-end border-b border-slate-200 pb-4">
-        <div className="flex-1">
-          <label className="block text-sm font-medium text-slate-700 mb-1">
-            Sponsor name
+      <div className="border-b border-slate-200 pb-4 space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-medium text-slate-700 mb-1">
+              Sponsor name
+            </label>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-700 mb-1">
+              Tier
+            </label>
+            <select
+              value={tier}
+              onChange={(e) => setTier(e.target.value as (typeof TIERS)[number])}
+              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            >
+              {TIERS.map((t) => (
+                <option key={t} value={t}>
+                  {t || 'None'}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-slate-700 mb-1">
+            Website
           </label>
           <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+            placeholder="https://"
             className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
+
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
-            Tier
+          <label className="block text-xs font-medium text-slate-700 mb-1">
+            Description
           </label>
-          <select
-            value={tier}
-            onChange={(e) => setTier(e.target.value as (typeof TIERS)[number])}
-            className="rounded border border-slate-300 px-3 py-2 text-sm"
-          >
-            {TIERS.map((t) => (
-              <option key={t} value={t}>
-                {t || 'None'}
-              </option>
-            ))}
-          </select>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={2}
+            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+          />
         </div>
+
+        <div className="grid grid-cols-3 gap-3">
+          <div>
+            <label className="block text-xs font-medium text-slate-700 mb-1">
+              Contact name
+            </label>
+            <input
+              value={contactName}
+              onChange={(e) => setContactName(e.target.value)}
+              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-700 mb-1">
+              Contact email
+            </label>
+            <input
+              value={contactEmail}
+              onChange={(e) => setContactEmail(e.target.value)}
+              type="email"
+              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-700 mb-1">
+              Contact phone
+            </label>
+            <input
+              value={contactPhone}
+              onChange={(e) => setContactPhone(e.target.value)}
+              className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            />
+          </div>
+        </div>
+
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
+          <label className="block text-xs font-medium text-slate-700 mb-1">
             Logo
           </label>
           <input
@@ -100,6 +175,7 @@ export function StepSponsors({ draftId }: Props) {
             className="text-sm"
           />
         </div>
+
         <button
           onClick={addSponsor}
           className="rounded bg-slate-900 text-white text-sm font-medium px-4 py-2 hover:bg-slate-800"
@@ -120,7 +196,9 @@ export function StepSponsors({ draftId }: Props) {
               )}
               <div>
                 <p className="font-medium text-slate-900">{s.name}</p>
-                {s.tier && <p className="text-xs text-slate-500">{s.tier}</p>}
+                <p className="text-xs text-slate-500">
+                  {[s.tier, s.website].filter(Boolean).join(' · ')}
+                </p>
               </div>
             </div>
             <button

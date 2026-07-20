@@ -14,6 +14,14 @@ export function StepSpeakers() {
   const [password, setPassword] = useState('')
   const [title, setTitle] = useState('')
   const [company, setCompany] = useState('')
+  const [bio, setBio] = useState('')
+  const [phone, setPhone] = useState('')
+  const [linkedin, setLinkedin] = useState('')
+  const [twitter, setTwitter] = useState('')
+  const [website, setWebsite] = useState('')
+  const [github, setGithub] = useState('')
+  const [medium, setMedium] = useState('')
+  const [instagram, setInstagram] = useState('')
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -49,14 +57,31 @@ export function StepSpeakers() {
         role: 'speaker',
       })
       const uid = (result.data as { uid: string }).uid
-      if (title || company) {
-        await updateDoc(doc(db, 'users', uid), { title, company })
-      }
+      await updateDoc(doc(db, 'users', uid), {
+        title: title.trim(),
+        company: company.trim(),
+        bio: bio.trim(),
+        phone: phone.trim(),
+        linkedin: linkedin.trim(),
+        twitter: twitter.trim(),
+        website: website.trim(),
+        github: github.trim(),
+        medium: medium.trim(),
+        instagram: instagram.trim(),
+      })
       setName('')
       setEmail('')
       setPassword('')
       setTitle('')
       setCompany('')
+      setBio('')
+      setPhone('')
+      setLinkedin('')
+      setTwitter('')
+      setWebsite('')
+      setGithub('')
+      setMedium('')
+      setInstagram('')
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to create speaker.')
     } finally {
@@ -74,39 +99,103 @@ export function StepSpeakers() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-3 border-b border-slate-200 pb-4">
-        <input
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="rounded border border-slate-300 px-3 py-2 text-sm"
-        />
-        <input
-          placeholder="Email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="rounded border border-slate-300 px-3 py-2 text-sm"
-        />
-        <input
-          placeholder="Temporary password (min 6 chars)"
-          type="text"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="rounded border border-slate-300 px-3 py-2 text-sm"
-        />
-        <input
-          placeholder="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="rounded border border-slate-300 px-3 py-2 text-sm"
-        />
-        <input
-          placeholder="Company"
-          value={company}
-          onChange={(e) => setCompany(e.target.value)}
-          className="rounded border border-slate-300 px-3 py-2 text-sm"
-        />
+      <div className="border-b border-slate-200 pb-4 space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <input
+            placeholder="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="rounded border border-slate-300 px-3 py-2 text-sm"
+          />
+          <input
+            placeholder="Email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="rounded border border-slate-300 px-3 py-2 text-sm"
+          />
+          <input
+            placeholder="Temporary password (min 6 chars)"
+            type="text"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="rounded border border-slate-300 px-3 py-2 text-sm"
+          />
+          <input
+            placeholder="Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="rounded border border-slate-300 px-3 py-2 text-sm"
+          />
+          <input
+            placeholder="Company"
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
+            className="rounded border border-slate-300 px-3 py-2 text-sm"
+          />
+          <input
+            placeholder="Phone"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="rounded border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-slate-700 mb-1">
+            Bio
+          </label>
+          <textarea
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            rows={2}
+            placeholder="Shown on the speaker's profile and session cards"
+            className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+
+        <div>
+          <p className="text-xs font-medium text-slate-700 mb-1">Links (all optional)</p>
+          <div className="grid grid-cols-3 gap-3">
+            <input
+              placeholder="LinkedIn URL"
+              value={linkedin}
+              onChange={(e) => setLinkedin(e.target.value)}
+              className="rounded border border-slate-300 px-3 py-2 text-sm"
+            />
+            <input
+              placeholder="Twitter/X URL"
+              value={twitter}
+              onChange={(e) => setTwitter(e.target.value)}
+              className="rounded border border-slate-300 px-3 py-2 text-sm"
+            />
+            <input
+              placeholder="Website URL"
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
+              className="rounded border border-slate-300 px-3 py-2 text-sm"
+            />
+            <input
+              placeholder="GitHub URL"
+              value={github}
+              onChange={(e) => setGithub(e.target.value)}
+              className="rounded border border-slate-300 px-3 py-2 text-sm"
+            />
+            <input
+              placeholder="Medium URL"
+              value={medium}
+              onChange={(e) => setMedium(e.target.value)}
+              className="rounded border border-slate-300 px-3 py-2 text-sm"
+            />
+            <input
+              placeholder="Instagram URL"
+              value={instagram}
+              onChange={(e) => setInstagram(e.target.value)}
+              className="rounded border border-slate-300 px-3 py-2 text-sm"
+            />
+          </div>
+        </div>
+
         <button
           onClick={createSpeaker}
           disabled={creating}
